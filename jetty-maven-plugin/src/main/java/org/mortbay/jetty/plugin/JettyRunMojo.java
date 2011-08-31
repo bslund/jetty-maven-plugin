@@ -26,6 +26,8 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.util.FileUtils;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.util.Scanner;
@@ -96,7 +98,12 @@ public class JettyRunMojo extends AbstractJettyMojo
     private File classesDirectory;
     
     
-    
+     /**
+     * List of other contexts to set up. Optional.
+     * @parameter
+     */
+    private ContextHandler[] contextHandlers;
+
     /**
      * The directory containing generated test classes.
      * 
@@ -201,7 +208,7 @@ public class JettyRunMojo extends AbstractJettyMojo
         {
             if ((getWebAppSourceDirectory() == null) || !getWebAppSourceDirectory().exists())
             {
-                webAppSourceDirectory = new File (project.getBasedir(), "src"+File.separator+"main"+File.separator+"webapp");
+                webAppSourceDirectory = new File (getProject().getBasedir(), "src"+File.separator+"main"+File.separator+"webapp");
                 getLog().info("webAppSourceDirectory "+getWebAppSourceDirectory() +" does not exist. Defaulting to "+webAppSourceDirectory.getAbsolutePath());   
             }
             else
@@ -212,16 +219,6 @@ public class JettyRunMojo extends AbstractJettyMojo
             throw new MojoExecutionException("Webapp source directory does not exist", e);
         }
         
-        // check reload mechanic
-        if ( !"automatic".equalsIgnoreCase( reload ) && !"manual".equalsIgnoreCase( reload ) )
-        {
-            throw new MojoExecutionException( "invalid reload mechanic specified, must be 'automatic' or 'manual'" );
-        }
-        else
-        {
-            getLog().info("Reload Mechanic: " + reload );
-        }
-
 
         // check the classes to form a classpath with
         try
@@ -363,6 +360,13 @@ public class JettyRunMojo extends AbstractJettyMojo
         
        
         getLog().info("Webapp directory = " + getWebAppSourceDirectory().getCanonicalPath());
+
+        // Add extra context handlers
+        if (this.contextHandlers != null) {
+            for(Handler contextHandler : this.contextHandlers) {
+                getServer().addHandler(contextHandler);
+            }
+        }
     }
     
     public void configureScanner ()
@@ -441,7 +445,7 @@ public class JettyRunMojo extends AbstractJettyMojo
                 try
                 {
                     boolean reconfigure = changes.contains(getProject().getFile().getCanonicalPath());
-                    restartWebApp(reconfigure);
+                    restartWebApplications(reconfigure);
                 }
                 catch (Exception e)
                 {
@@ -452,7 +456,8 @@ public class JettyRunMojo extends AbstractJettyMojo
         setScannerListeners(listeners);
     }
 
-    public void restartWebApp(boolean reconfigureScanner) throws Exception 
+    @Override
+    public void restartWebApplications(boolean reconfigureScanner) throws Exception
     {
         getLog().info("restarting "+webAppConfig);
         getLog().debug("Stopping webapp ...");
@@ -518,9 +523,6 @@ public class JettyRunMojo extends AbstractJettyMojo
       
         return dependencyFiles; 
     }
-    
-    
-   
 
     private List<File> setUpClassPath(List<File> webInfClasses, List<File> webInfJars)
     {
@@ -551,41 +553,5 @@ public class JettyRunMojo extends AbstractJettyMojo
             classesDirs.add(getClassesDirectory());
         
         return classesDirs;
-    }
-  
-
-    public void finishConfigurationBeforeStart() throws Exception
-    {
-        HandlerCollection contexts = (HandlerCollection)server.getChildHandlerByClass(ContextHandlerCollection.class);
-        if (contexts==null)
-            contexts = (HandlerCollection)server.getChildHandlerByClass(HandlerCollection.class);
-        
-        for (int i=0; (this.contextHandlers != null) && (i < this.contextHandlers.length); i++)
-        {
-            contexts.addHandler(this.contextHandlers[i]);
-        }
-    }
-
-   
- 
-    
-    public void applyJettyXml() throws Exception
-    {
-        if (getJettyXmlFiles() == null)
-            return;
-        
-        for ( File xmlFile : getJettyXmlFiles() )
-        {
-            getLog().info( "Configuring Jetty from xml configuration file = " + xmlFile.getCanonicalPath() );        
-            XmlConfiguration xmlConfiguration = new XmlConfiguration(xmlFile.toURI().toURL());
-            xmlConfiguration.configure(this.server);
-        }
-    }
-
-
-    
-    public void execute() throws MojoExecutionException, MojoFailureException
-    {
-        super.execute();
     }
 }

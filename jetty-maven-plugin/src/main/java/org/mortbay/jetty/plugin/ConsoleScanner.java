@@ -24,9 +24,9 @@ import org.mortbay.jetty.plugin.AbstractJettyMojo;
 public class ConsoleScanner extends Thread 
 {
     
-    private final AbstractJettyMojo mojo;
+    private final AbstractEmbeddedJettyMojo mojo;
     
-    public ConsoleScanner(AbstractJettyMojo mojo) 
+    public ConsoleScanner(AbstractEmbeddedJettyMojo mojo)
     {
         this.mojo = mojo;
         setName("Console scanner");
@@ -106,7 +106,7 @@ public class ConsoleScanner extends Thread
     {
         try
         {
-            mojo.restartWebApp(false);
+            mojo.restartWebApplications(false);
             // Clear input buffer to discard anything entered on the console
             // while the application was being restarted.
             clearInputBuffer();
@@ -114,7 +114,7 @@ public class ConsoleScanner extends Thread
         catch (Exception e)
         {
             mojo.getLog().error(
-                            "Error reconfiguring/restarting webapp after a new line on the console",
+                            "Error reconfiguring/restarting jetty after a new line on the console",
                             e);
         }
     }

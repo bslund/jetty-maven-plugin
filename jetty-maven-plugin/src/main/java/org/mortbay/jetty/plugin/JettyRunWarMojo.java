@@ -170,7 +170,7 @@ public class JettyRunWarMojo extends AbstractJettyMojo
         {
             getLog().info( "Configuring Jetty from xml configuration file = " + xmlFile.getCanonicalPath() );        
             XmlConfiguration xmlConfiguration = new XmlConfiguration(xmlFile.toURI().toURL());
-            xmlConfiguration.configure(this.server);
+            xmlConfiguration.configure(this.getServer());
         }
     }
 

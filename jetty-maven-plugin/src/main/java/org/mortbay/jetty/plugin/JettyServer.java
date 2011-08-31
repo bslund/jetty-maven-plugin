@@ -72,10 +72,17 @@ public class JettyServer extends org.eclipse.jetty.server.Server
      * @see org.eclipse.jetty.server.handler.HandlerCollection#addHandler(org.eclipse.jetty.server.Handler)
      */
     public void addWebApplication(WebAppContext webapp) throws Exception
-    {  
-        contexts.addHandler (webapp);
+    {
+        addHandler(webapp);
     }
 
+
+    /**
+     * @see org.eclipse.jetty.server.handler.HandlerCollection#addHandler(org.eclipse.jetty.server.Handler)
+     */
+    public void addHandler(Handler handler) throws Exception {
+        contexts.addHandler(handler);
+    }
     
     /**
      * Set up the handler structure to receive a webapp.
