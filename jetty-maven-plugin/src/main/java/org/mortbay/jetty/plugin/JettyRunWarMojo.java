@@ -174,6 +174,14 @@ public class JettyRunWarMojo extends AbstractJettyMojo
         }
     }
 
+
+
+    @Override
+    public void restartWebApplications(boolean reconfigureScanner)
+            throws Exception {
+        throw new UnsupportedOperationException("not implemented");        
+    }
+
   
 
     

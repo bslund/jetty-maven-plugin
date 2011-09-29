@@ -51,6 +51,7 @@ public class JettyAggregatedRunMojo extends AbstractEmbeddedJettyMojo {
                 List<File> files = scanBuilder.setupScannerFiles(webAppConfig,
                         Arrays.asList(subProject.getFile()),
                         Collections.<String>emptyList());
+                webAppConfig.setClassPathFiles(files);
 
                 getLog().info("Scanning: " + files);
                 
