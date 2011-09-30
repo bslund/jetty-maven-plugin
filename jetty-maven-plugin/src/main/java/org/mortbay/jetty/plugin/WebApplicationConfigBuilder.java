@@ -32,7 +32,7 @@ public class WebApplicationConfigBuilder {
         Xpp3Dom config = (Xpp3Dom) plugin.getConfiguration();
         applyPOMWebAppConfig(config, webAppConfig);
 
-        if (webAppConfig.getContextPath() == null || webAppConfig.getContextPath().length() <= 1) {
+        if (webAppConfig.getContextPath() == null || webAppConfig.getContextPath().length() < 1) {
             webAppConfig.setContextPath("/" + project.getArtifactId());
         }
 
